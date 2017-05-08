@@ -2243,9 +2243,12 @@ public class Vala.Parser : CodeVisitor {
 	
 		switch (current ()) {	
 		case TokenType.CONSTRUCT:
-			rollback (begin);
-			parse_constructor_declaration (parent, attrs);
-			return;
+			if (context.profile == Profile.GOBJECT) {
+				rollback (begin);
+				parse_constructor_declaration (parent, attrs);
+				return;
+			}
+			break;
 		case TokenType.TILDE:
 			rollback (begin);
 			parse_destructor_declaration (parent, attrs);
@@ -2859,8 +2862,8 @@ public class Vala.Parser : CodeVisitor {
 					bool writable, _construct;
 					if (accept (TokenType.SET)) {
 						writable = true;
-						_construct = accept (TokenType.CONSTRUCT);
-					} else if (accept (TokenType.CONSTRUCT)) {
+						_construct = (context.profile == Profile.GOBJECT) && accept (TokenType.CONSTRUCT);
+					} else if (context.profile == Profile.GOBJECT && accept (TokenType.CONSTRUCT)) {
 						_construct = true;
 						writable = accept (TokenType.SET);
 					} else {
