@@ -45,9 +45,14 @@ public class Vala.CCodeCompiler {
 				pc += " " + pkg;
 			}
 		}
-		string? pkgflags = context.pkg_config_compile_flags (pc);
-		if (pkgflags == null) {
-			return;
+		string? pkgflags;
+		if (pc.length > 0) {
+			pkgflags = context.pkg_config_compile_flags (pc);
+			if (pkgflags == null) {
+				return;
+			}
+		} else {
+			pkgflags = "";
 		}
 
 		// TODO compile the C code files in parallel
