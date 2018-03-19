@@ -5544,38 +5544,38 @@ public abstract class Vala.CCodeBaseModule : CodeGenerator {
 					set_cvalue (expr, new CCodeConstant ("%s %s".printf (left, right)));
 					return;
 				} else {
+					var temp_value = create_temp_value (expr.value_type, false, expr);
+					CCodeFunctionCall ccall;
+
 					if (context.profile == Profile.POSIX) {
-						// convert to strcat(strcpy(malloc(1+strlen(a)+strlen(b)),a),b)
-						var strcat = new CCodeFunctionCall (new CCodeIdentifier ("strcat"));
+						// convert to strcat (strcpy (malloc (1 + strlen (a) + strlen (b)), a), b)
+						ccall = new CCodeFunctionCall (new CCodeIdentifier ("strcat"));
 						var strcpy = new CCodeFunctionCall (new CCodeIdentifier ("strcpy"));
 						var malloc = new CCodeFunctionCall (new CCodeIdentifier ("malloc"));
 
 						var strlen_a = new CCodeFunctionCall (new CCodeIdentifier ("strlen"));
-						strlen_a.add_argument(cleft);
+						strlen_a.add_argument (cleft);
 						var strlen_b = new CCodeFunctionCall (new CCodeIdentifier ("strlen"));
-						strlen_b.add_argument(cright);
-						var newlength = new CCodeBinaryExpression (CCodeBinaryOperator.PLUS, new CCodeIdentifier("1"),
+						strlen_b.add_argument (cright);
+						var newlength = new CCodeBinaryExpression (CCodeBinaryOperator.PLUS, new CCodeIdentifier ("1"),
 							new CCodeBinaryExpression (CCodeBinaryOperator.PLUS, strlen_a, strlen_b));
-						malloc.add_argument(newlength);
+						malloc.add_argument (newlength);
 
-						strcpy.add_argument(malloc);
-						strcpy.add_argument(cleft);
+						strcpy.add_argument (malloc);
+						strcpy.add_argument (cleft);
 
-						strcat.add_argument(strcpy);
-						strcat.add_argument(cright);
-						set_cvalue (expr, strcat);
+						ccall.add_argument (strcpy);
+						ccall.add_argument (cright);
 					} else {
 						// convert to g_strconcat (a, b, NULL)
-						var temp_value = create_temp_value (expr.value_type, false, expr);
-
-						var ccall = new CCodeFunctionCall (new CCodeIdentifier ("g_strconcat"));
+						ccall = new CCodeFunctionCall (new CCodeIdentifier ("g_strconcat"));
 						ccall.add_argument (cleft);
 						ccall.add_argument (cright);
 						ccall.add_argument (new CCodeConstant("NULL"));
-
-						ccode.add_assignment (get_cvalue_ (temp_value), ccall);
-						expr.target_value = temp_value;
 					}
+
+					ccode.add_assignment (get_cvalue_ (temp_value), ccall);
+					expr.target_value = temp_value;
 					return;
 				}
 			} else if (expr.operator == BinaryOperator.EQUALITY
