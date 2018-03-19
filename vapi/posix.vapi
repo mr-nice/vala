@@ -266,19 +266,6 @@ public struct va_list {
 [Immutable]
 [CCode (cname = "char", const_cname = "const char", copy_function = "strdup", free_function = "free", cheader_filename = "stdlib.h,string.h")]
 public class string {
-	[Deprecated (replacement = "int.parse")]
-	[CCode (cname="atoi")]
-	public int to_int();
-	[Deprecated (replacement = "long.parse")]
-	[CCode (cname="atol")]
-	public long to_long();
-	[Deprecated (replacement = "int64.parse")]
-	[CCode (cname="atoll")]
-	public int64 to_int64();
-	[Deprecated (replacement = "string.length")]
-	[CCode (cname="strlen")]
-	public int len();
-
 	[PrintfFormat]
 	public string printf (...);
 
